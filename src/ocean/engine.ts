@@ -9,7 +9,7 @@ let GAP = 1; // px of gap around each tile
 function sizeGrid() {
   // Sharks are drawn about half as long on phones, so half-size cells keep
   // the same number of tiles across a body as on desktop.
-  CELL = innerWidth < 640 ? 5 : 10;
+  CELL = matchMedia("(max-width: 640px), (max-height: 600px) and (pointer: coarse)").matches ? 5 : 10;
   FONT = Math.round(CELL * 0.72);
   GAP = CELL < 9 ? 0.75 : 1;
   document.documentElement.style.setProperty("--cell", `${CELL}px`);

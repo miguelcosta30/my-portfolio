@@ -966,19 +966,22 @@ h1 .smile {
 
 /* ---------- Mobile ---------- */
 
-@media (max-width: 640px) {
+/* Phones keep the bottom navigation when rotated wider than 640px. */
+@media (max-width: 640px), (max-height: 600px) and (pointer: coarse) {
   body {
     -webkit-tap-highlight-color: transparent;
   }
 
   /* The whole page scrolls (under the tab bar), instead of scrolling inside the card. */
   .hero {
+    height: 100dvh;
+    bottom: auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start; /* centring would push tall content off the top */
     align-items: stretch;
     gap: 16px;
-    padding: calc(env(safe-area-inset-top) + 96px) 16px 0;
+    padding: calc(env(safe-area-inset-top) + 96px) calc(env(safe-area-inset-right) + 16px) 0 calc(env(safe-area-inset-left) + 16px);
     overflow-y: auto;
     overscroll-behavior: contain;
     pointer-events: auto;
@@ -1023,8 +1026,10 @@ h1 .smile {
   .nav {
     top: auto;
     bottom: calc(env(safe-area-inset-bottom) + 12px);
-    left: 12px;
-    right: 12px;
+    left: calc(env(safe-area-inset-left) + 12px);
+    right: calc(env(safe-area-inset-right) + 12px);
+    max-width: 560px;
+    margin-inline: auto;
     translate: none;
     padding: 6px;
     border-radius: 28px;
@@ -1053,7 +1058,7 @@ h1 .smile {
   /* 30px = 6 cells of 5px, so the sun/moon lines up with the grid. */
   .theme-badge {
     top: calc(env(safe-area-inset-top) + 14px);
-    right: 14px;
+    right: calc(env(safe-area-inset-right) + 14px);
     width: 30px;
     height: 30px;
   }
@@ -1102,6 +1107,16 @@ h1 .smile {
   /* Leave room above the phone for its title row. */
   .player[data-device="phone"] .player-video {
     height: min(72vh, 640px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (pointer: coarse) {
+  .hero {
+    padding-top: calc(env(safe-area-inset-top) + 56px);
+    gap: 12px;
+  }
+  h1 {
+    font-size: 32px;
   }
 }
 
