@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>Miguel Costa — Portfolio</title>
+  <rect width="1200" height="630" fill="#0d0e11" />
+  <g transform="translate(472 100) scale(4)">
+    <rect x="44.35" y="12.35" width="3.3" height="3.3" fill="rgb(174,176,183)" />
+    <rect x="48.35" y="12.35" width="3.3" height="3.3" fill="rgb(158,160,167)" />
+    <rect x="36.35" y="16.35" width="3.3" height="3.3" fill="rgb(153,155,162)" />
+    <rect x="40.35" y="16.35" width="3.3" height="3.3" fill="rgb(200,202,209)" />
+    <rect x="44.35" y="16.35" width="3.3" height="3.3" fill="rgb(212,214,221)" />
+    <rect x="48.35" y="16.35" width="3.3" height="3.3" fill="rgb(158,160,167)" />
+    <rect x="28.35" y="20.35" width="3.3" height="3.3" fill="rgb(154,156,163)" />
+    <rect x="32.35" y="20.35" width="3.3" height="3.3" fill="rgb(158,160,167)" />
+    <rect x="36.35" y="20.35" width="3.3" height="3.3" fill="rgb(207,209,216)" />
+    <rect x="40.35" y="20.35" width="3.3" height="3.3" fill="rgb(225,227,234)" />
+    <rect x="44.35" y="20.35" width="3.3" height="3.3" fill="rgb(172,174,181)" />
+    <rect x="28.35" y="24.35" width="3.3" height="3.3" fill="rgb(164,166,173)" />
+    <rect x="32.35" y="24.35" width="3.3" height="3.3" fill="rgb(200,202,209)" />
+    <rect x="36.35" y="24.35" width="3.3" height="3.3" fill="rgb(225,227,234)" />
+    <rect x="40.35" y="24.35" width="3.3" height="3.3" fill="rgb(180,182,189)" />
+    <rect x="24.35" y="28.35" width="3.3" height="3.3" fill="rgb(148,150,157)" />
+    <rect x="28.35" y="28.35" width="3.3" height="3.3" fill="rgb(188,190,197)" />
+    <rect x="32.35" y="28.35" width="3.3" height="3.3" fill="rgb(210,212,219)" />
+    <rect x="36.35" y="28.35" width="3.3" height="3.3" fill="rgb(180,182,189)" />
+    <rect x="40.35" y="28.35" width="3.3" height="3.3" fill="rgb(148,150,157)" />
+    <rect x="24.35" y="32.35" width="3.3" height="3.3" fill="rgb(179,181,188)" />
+    <rect x="28.35" y="32.35" width="3.3" height="3.3" fill="rgb(200,202,209)" />
+    <rect x="32.35" y="32.35" width="3.3" height="3.3" fill="rgb(168,170,177)" />
+    <rect x="36.35" y="32.35" width="3.3" height="3.3" fill="rgb(164,166,173)" />
+    <rect x="20.35" y="36.35" width="3.3" height="3.3" fill="rgb(172,174,181)" />
+    <rect x="24.35" y="36.35" width="3.3" height="3.3" fill="rgb(194,196,203)" />
+    <rect x="28.35" y="36.35" width="3.3" height="3.3" fill="rgb(159,161,168)" />
+    <rect x="16.35" y="40.35" width="3.3" height="3.3" fill="rgb(158,160,167)" />
+    <rect x="20.35" y="40.35" width="3.3" height="3.3" fill="rgb(183,185,192)" />
+    <rect x="24.35" y="40.35" width="3.3" height="3.3" fill="rgb(150,152,159)" />
+    <rect x="12.35" y="44.35" width="3.3" height="3.3" fill="rgb(155,157,164)" />
+    <rect x="16.35" y="44.35" width="3.3" height="3.3" fill="rgb(169,171,178)" />
+    <rect x="12.35" y="48.35" width="3.3" height="3.3" fill="rgb(150,152,159)" />
+  </g>
+  <text x="600" y="435" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="44" fill="#eceef3">Miguel Costa</text>
+  <text x="600" y="480" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#9a9da7">Software engineer · AI · Mobile</text>
+  <text x="600" y="563" text-anchor="middle" font-family="monospace" font-size="18" fill="#80838d">miguelfcosta.com</text>
+</svg>
