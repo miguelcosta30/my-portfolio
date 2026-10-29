@@ -164,6 +164,9 @@ export class Shark {
   L = 260;
   speed = 50;
   depth = 1;
+  /** Extra sharks fade out after the opening scene. */
+  intro = false;
+  opacity = 1;
   private phase = Math.random() * Math.PI * 2;
   private omega = 0;
   private turnTarget = 0;
@@ -208,8 +211,8 @@ export class Shark {
     const f = 1 - d / reach;
     // Flee directly away from the click, with a little randomness so a group scatters.
     this.fleeAngle = Math.atan2(cy - y, cx - x) + (Math.random() - 0.5) * 0.6;
-    this.flee = 0.9 + f * 1.1;
-    this.boost = Math.max(this.boost, 2.5 + f * 3);
+    this.flee = 0.55 + f * 0.65;
+    this.boost = Math.max(this.boost, 1.2 + f * 1.8);
     this.turnTimer = this.flee + 0.5; // don't wander mid-escape
     return f;
   }
@@ -224,12 +227,18 @@ export class Shark {
       this.turnTimer = 1.5 + Math.random() * 3.5;
     }
 
-    // Drift back towards the screen if wandering too far off it.
+    // Look ahead and turn before reaching an edge, instead of waiting until
+    // the head is off screen and swimming a long loop back into view.
     let steer = 0;
-    const m = L * 0.15;
-    if (this.x < -m || this.x > w + m || this.y < -m || this.y > h + m) {
-      const toCenter = Math.atan2(h / 2 - this.y, w / 2 - this.x);
-      steer += angleTo(this.heading, toCenter) * 1.4;
+    const ahead = L;
+    const px = this.x + Math.cos(this.heading) * ahead;
+    const py = this.y + Math.sin(this.heading) * ahead;
+    const mx = Math.min(w * 0.2, L * 0.35);
+    const my = Math.min(h * 0.2, L * 0.35);
+    const backX = px < mx ? mx - px : px > w - mx ? w - mx - px : 0;
+    const backY = py < my ? my - py : py > h - my ? h - my - py : 0;
+    if (backX || backY) {
+      steer += angleTo(this.heading, Math.atan2(h / 2 - this.y, w / 2 - this.x)) * 2.5;
     }
 
     // Shy of the cursor.
@@ -244,7 +253,7 @@ export class Shark {
     }
     // Panic overrides everything else: a fast, decisive turn away from the click.
     let maxTurn = 2.2;
-    let response = 1.2;
+    let response = backX || backY ? 3 : 1.2;
     if (this.flee > 0) {
       this.flee -= dt;
       steer = angleTo(this.heading, this.fleeAngle) * 6;

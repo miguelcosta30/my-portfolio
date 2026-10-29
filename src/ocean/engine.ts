@@ -18,6 +18,9 @@ const RAMP = ":;tSX%8@";
 const LEVELS = 16;
 const FULL = 9; // samples per cell at full coverage (splat spacing is 0.3 cell)
 const ACCENT_CHANCE = 6; // % of tiles that get a stronger accent on top of the shark's cast
+const RESIDENT_SHARKS = 2;
+const INTRO_HOLD = 6; // seconds before the opening group starts fading
+const INTRO_FADE = 2;
 
 type RGB = [number, number, number];
 
@@ -176,6 +179,7 @@ export class OceanEngine {
   private overlay?: CanvasRenderingContext2D;
 
   private tintById: number[] = [];
+  private opacityById: number[] = [];
   private raf = 0;
   private last = 0;
   private time = 0;
@@ -187,6 +191,12 @@ export class OceanEngine {
 
     addEventListener("resize", this.resize);
     addEventListener("pointermove", (e) => {
+      // A finger leaves no hovering cursor. Keeping its last position makes
+      // sharks keep fleeing from a touch long after the visitor has scrolled.
+      if (e.pointerType !== "mouse") {
+        this.pointer.x = this.pointer.y = -9999;
+        return;
+      }
       this.pointer.x = e.clientX;
       this.pointer.y = e.clientY;
     });
@@ -350,13 +360,17 @@ export class OceanEngine {
     this.owner = new Int32Array(n);
     this.key = new Uint32Array(n);
 
-    const want = Math.round(Math.min(7, Math.max(3, (this.w * this.h) / 360_000)));
+    const opening = !this.still && this.time < INTRO_HOLD + INTRO_FADE;
+    const want = opening ? Math.round(Math.min(7, Math.max(3, (this.w * this.h) / 360_000))) : RESIDENT_SHARKS;
     for (const s of this.sharks) {
       s.w = this.w;
       s.h = this.h;
     }
-    while (this.sharks.length < want) this.sharks.push(new Shark(this.w, this.h, SPAWN_ORDER[this.sharks.length % SPAWN_ORDER.length]));
-    this.sharks.length = want;
+    while (this.sharks.length < want) {
+      const s = new Shark(this.w, this.h, SPAWN_ORDER[this.sharks.length % SPAWN_ORDER.length]);
+      s.intro = this.sharks.length >= RESIDENT_SHARKS;
+      this.sharks.push(s);
+    }
 
     this.dust = Array.from({ length: Math.round((this.w * this.h) / 9000) }, () => ({
       x: Math.random() * this.w,
@@ -392,7 +406,10 @@ export class OceanEngine {
 
   private update(dt: number) {
     this.badge?.update(dt, this.pointer, CELL);
+    const introOpacity = Math.max(0, 1 - Math.max(0, this.time - INTRO_HOLD) / INTRO_FADE);
+    this.sharks = this.sharks.filter((s) => !s.intro || introOpacity > 0);
     for (const s of this.sharks) {
+      s.opacity = s.intro ? introOpacity : 1;
       s.update(dt, this.pointer);
       if (Math.random() < dt * 0.6) this.burst(s.head(), 2 + Math.floor(Math.random() * 3));
     }
@@ -424,6 +441,7 @@ export class OceanEngine {
     for (const s of this.sharks) {
       const id = s.id;
       this.tintById[id] = s.tint;
+      this.opacityById[id] = s.opacity;
       s.splat(CELL, (x, y, b, k) => {
         const c = Math.floor(x / CELL);
         const r = Math.floor(y / CELL);
@@ -469,7 +487,7 @@ export class OceanEngine {
     for (let i = 0; i < owner.length; i++) {
       if (owner[i] < 0) continue;
       const b = (bright[i] /= count[i]);
-      alpha[i] = Math.min(1, count[i] / FULL) ** 0.8;
+      alpha[i] = Math.min(1, count[i] / FULL) ** 0.8 * this.opacityById[owner[i]];
       if (alpha[i] < 0.08) continue;
       ctx.globalAlpha = alpha[i];
       const hk = hash(key[i]);
