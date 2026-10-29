@@ -13,7 +13,7 @@ initPlayer();
 initPreview();
 
 let engine: OceanEngine | undefined;
-const landing = initLanding((rect, corner, reach) => engine?.splash(rect, corner, 2, reach));
+const landing = initLanding((rect, corner, reach) => engine?.splash(rect, corner, 1, reach));
 const theme = initTheme((t) => engine?.setTheme(t));
 
 // Load the monospace font first so glyphs render in it from the first frame.

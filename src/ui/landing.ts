@@ -10,7 +10,7 @@ export function initLanding(splash: Splash) {
   const root = document.documentElement;
   const card = document.querySelector<HTMLElement>(".card")!;
 
-  const impact = () => splash(card.getBoundingClientRect(), parseFloat(getComputedStyle(card).borderTopLeftRadius) || 14, 0.3); // same reach as the tabs' mini splash
+  const impact = () => splash(card.getBoundingClientRect(), parseFloat(getComputedStyle(card).borderTopLeftRadius) || 14, 0.55);
 
   // A stone hitting the water: accelerate down onto the surface, then splash.
   const land = (height = 1.025, duration = 240) => {

@@ -536,8 +536,8 @@ export class OceanEngine {
         // around the content: they look the same everywhere.
         const o = this.overlay ?? ctx;
         o.fillStyle = pal.particle;
-        o.globalAlpha = 0.32 * (1 - r.age / SPLASH_LIFE);
-        this.rectRing(o, r.x, r.y, r.shape, radius * 0.55 * r.shape.speed, r.age / SPLASH_LIFE, ch);
+        o.globalAlpha = 0.24 * (1 - r.age / SPLASH_LIFE);
+        this.rectRing(o, r.x, r.y, r.shape, radius * r.shape.speed, r.age / SPLASH_LIFE, ch);
         o.globalAlpha = 1;
         continue;
       }
@@ -561,7 +561,7 @@ export class OceanEngine {
   }
 
   /**
-   * A rounded rect grown outward by roughly `grow`, traced as grid-snapped
+   * A rounded rect grown outward by roughly `grow`, traced as moving
    * dots. The distance wobbles smoothly around the ring (a few sines with
    * random phases) and dots drop out as it ages, so no two splashes match.
    */
@@ -576,7 +576,9 @@ export class OceanEngine {
       if ((hash(s.seed + Math.round((a + 4) * 8)) & 1023) / 1023 < 0.15 + life * 0.6) return;
       const wobble = 1 + 0.22 * Math.sin(a * 2 + p1) + 0.14 * Math.sin(a * 5 + p2) + 0.08 * Math.sin(a * 9 + p3);
       const d = s.r + grow * wobble;
-      this.glyphAt(cx + bx + nx * d, cy + by + ny * d, ch, ctx);
+      // Keep the grid's spacing, but move continuously between cells. Snapping
+      // a slow, straight edge to CELL makes the whole wave jump in lockstep.
+      ctx.fillText(ch, cx + bx + nx * d, cy + by + ny * d);
     };
     const step = CELL;
     for (let x = -hx; x <= hx; x += step) {
