@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Miguel Costa — Portfolio</title>
+    <meta name="description" content="Portfolio of Miguel Costa, software engineer." />
+    <script>
+      // Apply the saved/system theme before first paint to avoid a flash.
+      try {
+        const saved = localStorage.getItem("theme");
+        document.documentElement.dataset.theme =
+          saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <canvas id="ocean" aria-hidden="true"></canvas>
+    <div class="haze" aria-hidden="true"></div>
+    <!-- Above the haze, so the theme toggle is never blurred. -->
+    <canvas id="overlay" aria-hidden="true"></canvas>
+
+    <!-- Invisible hit area; the sun/moon itself is drawn into the ASCII ocean. -->
+    <button id="theme-toggle" class="theme-badge" aria-label="Toggle dark mode"></button>
+
+    <nav class="nav" aria-label="Sections">
+      <button data-section="about" aria-current="true"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5"/></svg><span>About</span></button>
+      <button data-section="work"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></svg><span>Work</span></button>
+      <button data-section="academic"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 9 12 4.5 21.5 9 12 13.5Z"/><path d="M6.5 11v4.2c1.5 1.4 3.4 2.1 5.5 2.1s4-.7 5.5-2.1V11M21.5 9v5"/></svg><span>Academic</span></button>
+      <button data-section="projects"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Projects</span></button>
+      <button data-section="socials"><svg class="tab-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 5.5h15a1 1 0 0 1 1 1v8.5a1 1 0 0 1-1 1H9.5l-4 3.5v-3.5h-1a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1Z"/></svg><span>Socials</span></button>
+    </nav>
+
+    <main class="hero">
+      <h1 id="headline">hi, i'm miguel.</h1>
+
+      <div class="card">
+        <section data-panel="about" data-headline="hi, i'm miguel.">
+          <p class="intro">
+            Full-stack software engineer with 5+ years of experience and a love for AI,
+            machine learning and mobile development.
+          </p>
+          <p class="where"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg><span>Based in Porto, Portugal</span></p>
+          <div class="actions about-actions"><a href="/cv.pdf" target="_blank" rel="noopener">check the cv <span aria-hidden="true">↗</span></a></div>
+        </section>
+
+        <section data-panel="work" data-headline="what i do." hidden>
+          <div class="edu">
+            <header>
+              <span class="logo" style="--logo: url(/logos/ctw.svg)" role="img" aria-label="Critical TechWorks logo"></span>
+              <div>
+                <h3><a class="org-link" href="https://www.criticaltechworks.com" target="_blank" rel="noopener">Critical TechWorks</a></h3>
+                <p>Porto, Portugal</p>
+              </div>
+              <time>2021 — now</time>
+            </header>
+
+            <ol class="roles">
+              <li class="role current">
+                <div class="role-head">
+                  <h4>Applied AI Engineer</h4>
+                  <time>2026 — now</time>
+                </div>
+                <ul class="points">
+                  <li>R&amp;D teams helping the company move to an AI-native way of working</li>
+                  <li>Daily use of AI coding tools — GitHub Copilot, Claude Code</li>
+                  <li>Agent orchestration and sandboxed execution environments</li>
+                  <li>Building and running on Azure</li>
+                </ul>
+                <ul class="tags"><li>agents</li><li>claude code</li><li>copilot</li><li>sandboxes</li><li>azure</li></ul>
+              </li>
+
+              <li class="role">
+                <div class="role-head">
+                  <h4>Flutter Developer</h4>
+                  <time>2021 — 2025</time>
+                </div>
+                <ul class="points">
+                  <li>Built features for the My BMW app — one of the biggest Flutter apps in the world</li>
+                  <li>.NET backend services in a microservice architecture</li>
+                  <li>Domain-driven design across service boundaries</li>
+                </ul>
+                <ul class="tags"><li>flutter</li><li>dart</li><li>.net</li><li>microservices</li><li>ddd</li></ul>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section data-panel="academic" data-headline="where i studied." hidden>
+          <ol class="edu-list">
+            <li class="edu">
+              <header>
+                <span class="logo" style="--logo: url(/logos/isep.png)" role="img" aria-label="ISEP logo"></span>
+                <div>
+                  <h3>MSc Artificial Intelligence Engineering</h3>
+                  <p><a class="org-link" href="https://www.isep.ipp.pt" target="_blank" rel="noopener">Instituto Superior de Engenharia do Porto</a></p>
+                </div>
+                <time>2021 — 2024</time>
+              </header>
+
+              <p class="label">thesis</p>
+              <ul class="entries">
+                <li>
+                  <div class="entry-head"><span>Intelligent Surveillance System for Domestic Environments<small>Computer vision for home security · supervised by Prof. António Constantino Martins</small></span><em>computer vision · 2024</em></div>
+                  <div class="actions"><a href="/papers/msc-thesis-intelligent-surveillance.pdf" target="_blank" rel="noopener">check the paper <span aria-hidden="true">↗</span></a><button data-video="zQdV_a3H8_Q" data-title="iDetect" data-device="phone"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>watch the demo</button></div>
+                </li>
+              </ul>
+
+              <p class="label">publications</p>
+              <ul class="entries">
+                <li>
+                  <div class="entry-head"><span>Autonomous Restaurant<small>A multi-agent, robotics and IoT based approach</small></span><em>multi-agent · iot</em></div>
+                  <div class="actions"><a href="/papers/autonomous-restaurant.pdf" target="_blank" rel="noopener">check the paper <span aria-hidden="true">↗</span></a></div>
+                </li>
+                <li>
+                  <div class="entry-head"><span>Client Satisfaction Diagnosis<small>A knowledge based approach</small></span><em>expert systems</em></div>
+                  <div class="actions"><a href="/papers/client-satisfaction-diagnosis.pdf" target="_blank" rel="noopener">check the paper <span aria-hidden="true">↗</span></a></div>
+                </li>
+                <li>
+                  <div class="entry-head"><span>Digital Sales Assistant<small>A conversational recommendation system</small></span><em>nlp · deep learning</em></div>
+                  <div class="actions"><a href="/papers/digital-sales-assistant.pdf" target="_blank" rel="noopener">check the paper <span aria-hidden="true">↗</span></a></div>
+                </li>
+                <li>
+                  <div class="entry-head"><span>Store Layout and Shelf Planning<small>An artificial intelligence based approach</small></span><em>genetic algorithms</em></div>
+                  <div class="actions"><a href="/papers/store-layout-shelf-planning.pdf" target="_blank" rel="noopener">check the paper <span aria-hidden="true">↗</span></a></div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="edu">
+              <header>
+                <span class="logo" style="--logo: url(/logos/ufp.png)" role="img" aria-label="UFP logo"></span>
+                <div>
+                  <h3>BSc Computer Engineering</h3>
+                  <p><a class="org-link" href="https://www.ufp.pt" target="_blank" rel="noopener">Universidade Fernando Pessoa</a></p>
+                </div>
+                <time>2018 — 2021</time>
+              </header>
+
+              <p class="label">projects</p>
+              <ul class="entries">
+                <li>
+                  <div class="entry-head"><span>Vets4Pets<small>Vet clinic management — Android app, website and REST API, with an adoption forum</small></span><em>project report · 2021</em></div>
+                  <div class="actions"><a href="/papers/vets4pets.pdf" target="_blank" rel="noopener">check the report <span aria-hidden="true">↗</span></a><button data-video="6ZvB-hu_640" data-title="Vets4Pets" data-device="phone"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>watch the demo</button></div>
+                </li>
+                <li>
+                  <div class="entry-head"><span>OpenGL game<small>A small 3D game built with OpenGL and GLUT</small></span><em>opengl · glut</em></div>
+                  <div class="actions"><button data-video="X4GXLCqBtyc" data-title="OpenGL game" data-device="laptop"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>watch the demo</button></div>
+                </li>
+                <li>
+                  <div class="entry-head"><span>Four in a Row<small>The classic connect-four game, written in MIPS assembly</small></span><em>mips assembly</em></div>
+                  <div class="actions"><button data-video="aHJUijKDxyo" data-title="Four in a Row" data-device="laptop"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>watch the demo</button></div>
+                </li>
+              </ul>
+            </li>
+          </ol>
+        </section>
+
+        <section data-panel="projects" data-headline="things i build for fun." hidden>
+          <p class="label">apps</p>
+          <ul class="entries">
+            <li>
+              <div class="entry-head"><span>Pathly<small>AI trip planner — tell it where you're going and it builds the itinerary. Placeholder description.</small></span><em>ai · mobile · travel</em></div>
+              <div class="actions"><button data-video="rnUjxwPTEJ4" data-title="Pathly" data-device="phone"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>watch the demo</button></div>
+            </li>
+            <li>
+              <div class="entry-head"><span>InstaKal<small>Snap a photo of your meal and computer vision estimates the calories. Placeholder description.</small></span><em>computer vision · mobile · health</em></div>
+            </li>
+          </ul>
+
+          <p class="label">web apps</p>
+          <ul class="projects">
+            <li><a href="https://brunafcg2002.github.io/ag-insurance/" target="_blank" rel="noopener"><span>A. Gonçalves Seguros<small>Website for an insurance agency — campaigns, insurance products and FAQ, in Portuguese and English</small></span><em>live ↗</em></a></li>
+            <li><a href="https://brunagoncalves.com/" target="_blank" rel="noopener"><span>Bruna Gonçalves<small>Portfolio for a digital marketing and UGC content creator</small></span><em>live ↗</em></a></li>
+          </ul>
+        </section>
+
+        <section data-panel="socials" data-headline='say hello <span class="smile">(:</span>' hidden>
+          <ul class="socials">
+            <li><a href="mailto:miguel.costa30303@gmail.com"><span class="social-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg></span><span class="social-label">email</span><span class="social-value">miguel.costa30303@gmail.com</span><svg class="out" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+            <li><a href="tel:+351938607796"><span class="social-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span><span class="social-label">phone</span><span class="social-value">+351 938 607 796</span><svg class="out" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+            <li><a href="https://github.com/miguelcosta30" target="_blank" rel="noopener"><span class="social-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg></span><span class="social-label">github</span><span class="social-value">github.com/miguelcosta30</span><svg class="out" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+            <li><a href="#" target="_blank" rel="noopener"><span class="social-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.06c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.67 4.8 6.13V21h-4v-4.98c0-1.19-.02-2.72-1.66-2.72-1.66 0-1.92 1.3-1.92 2.63V21h-4V9.75Z"/></svg></span><span class="social-label">linkedin</span><span class="social-value">linkedin.com/in/your-handle</span><svg class="out" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <div id="player" class="player" hidden>
+      <div class="player-backdrop" data-close></div>
+      <div class="player-frame" role="dialog" aria-modal="true" aria-labelledby="player-title">
+        <header>
+          <span id="player-title"></span>
+          <button class="player-close" data-close aria-label="Close video">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </header>
+        <div class="player-video"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

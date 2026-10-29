@@ -1,0 +1,1093 @@
+:root {
+  --bg: #f6f6f4;
+  --grid: rgba(20, 20, 30, 0.045);
+  --text: #18181b;
+  --muted: #8a8a92;
+  --line: rgba(20, 20, 30, 0.09);
+  --cell: 13px;
+  --sans: "Manrope", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --haze: 250, 250, 248;
+  --body-text: #55555d;
+  --icon: #6b6b73;
+  --shadow: rgba(20, 20, 30, 0.06);
+  --chip: rgba(255, 255, 255, 0.6);
+  --button: rgba(20, 20, 30, 0.07);
+  --button-hover: rgba(20, 20, 30, 0.13);
+  --scroll-thumb: rgba(20, 20, 30, 0.14);
+  --scroll-thumb-hover: rgba(20, 20, 30, 0.3);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d0e11;
+  --grid: rgba(255, 255, 255, 0.035);
+  --text: #eceef3;
+  --muted: #80838d;
+  --line: rgba(255, 255, 255, 0.09);
+  --haze: 13, 14, 17;
+  --body-text: #a9acb6;
+  --icon: #9a9da7;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --chip: rgba(255, 255, 255, 0.05);
+  --button: rgba(255, 255, 255, 0.07);
+  --button-hover: rgba(255, 255, 255, 0.13);
+  --scroll-thumb: rgba(255, 255, 255, 0.12);
+  --scroll-thumb-hover: rgba(255, 255, 255, 0.28);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#ocean,
+#overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#overlay {
+  pointer-events: none;
+}
+
+/* Soft frosted pool behind the content: a soft-edged rounded rect sized and
+   centred on the card's on-screen part (vars set by ui/landing.ts), so it
+   follows the content and the rest of the ocean stays sharp. */
+.haze {
+  --feather: 120px;
+  position: fixed;
+  left: var(--card-x, 50%);
+  top: var(--card-y, 50%);
+  width: calc(var(--card-w, 720px) + 2 * var(--feather));
+  height: calc(var(--card-h, 300px) + 2 * var(--feather));
+  translate: -50% -50%;
+  background: rgba(var(--haze), 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  /* Eased fade (not linear), so the edge has no visible start or end. */
+  --fade: transparent, rgba(0, 0, 0, 0.08) calc(var(--feather) * 0.25), rgba(0, 0, 0, 0.3) calc(var(--feather) * 0.5),
+    rgba(0, 0, 0, 0.7) calc(var(--feather) * 0.75), #000 var(--feather), #000 calc(100% - var(--feather)),
+    rgba(0, 0, 0, 0.7) calc(100% - var(--feather) * 0.75), rgba(0, 0, 0, 0.3) calc(100% - var(--feather) * 0.5),
+    rgba(0, 0, 0, 0.08) calc(100% - var(--feather) * 0.25), transparent;
+  mask-image: linear-gradient(to right, var(--fade)), linear-gradient(to bottom, var(--fade));
+  mask-composite: intersect;
+  -webkit-mask-image: linear-gradient(to right, var(--fade)), linear-gradient(to bottom, var(--fade));
+  -webkit-mask-composite: source-in;
+  pointer-events: none;
+}
+
+.card[data-active="academic"],
+.card[data-active="projects"] {
+  width: min(880px, calc(100vw - 32px));
+}
+.card[data-active="socials"] {
+  width: min(480px, calc(100vw - 32px));
+}
+/* ---------- Nav ---------- */
+
+.nav {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 12px;
+  z-index: 2;
+}
+.nav button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.nav button:hover {
+  color: var(--text);
+}
+/* Tab icons only appear in the mobile tab bar. */
+.tab-icon {
+  display: none;
+}
+/* Plain text tabs: the selected one is just darker and heavier. */
+.nav button[aria-current] {
+  color: var(--text);
+  font-weight: 500;
+}
+.theme-badge {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  z-index: 3;
+}
+/* The drawing is small, so let the tap target reach a little past it. */
+.theme-badge::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
+.theme-badge:focus-visible {
+  outline: 1px solid var(--muted);
+  outline-offset: 4px;
+}
+
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 28px;
+  padding: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+.hero > * {
+  pointer-events: auto;
+}
+
+h1 {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(36px, 6vw, 60px);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  text-align: center;
+}
+
+/* The "(:" in "say hello" — the parenthesis would otherwise tower over the x-height. */
+h1 .smile {
+  display: inline-block;
+  margin-left: 0.04em;
+  font-size: 0.62em;
+  vertical-align: 0.08em;
+}
+
+.card {
+  position: relative;
+  width: min(720px, calc(100vw - 32px));
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 18px;
+}
+.card section p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--body-text);
+}
+
+.card .intro {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.card .where {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.projects {
+  margin: -4px 0;
+  padding: 0;
+  list-style: none;
+}
+.projects a {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.projects li:last-child a {
+  border-bottom: 0;
+}
+.projects a:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.projects em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.socials {
+  margin: -6px 0;
+  padding: 0;
+  list-style: none;
+}
+.socials a {
+  display: grid;
+  grid-template-columns: 22px 72px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.socials li:last-child a {
+  border-bottom: 0;
+}
+.social-icon {
+  display: grid;
+  place-items: center;
+  color: var(--icon);
+}
+.social-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.social-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.socials .out {
+  color: var(--muted);
+}
+.socials a:hover .social-value {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
+/* ---------- Academic & projects ---------- */
+
+.card section[data-panel="academic"],
+.card section[data-panel="projects"] {
+  /* As tall as the screen allows, leaving room for the nav and headline. */
+  max-height: min(calc(100vh - 300px), 820px);
+  margin: -4px -6px 0;
+  padding: 4px 6px 0;
+  overflow-y: auto;
+  /* Fade the bottom edge so it's obvious there's more to scroll. */
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 36px), transparent);
+  padding-bottom: 28px;
+}
+.edu-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Degrees sit on the same timeline as the Work roles: a dot level with each
+   school's logo, joined by a hairline rail down to the next one. */
+.edu-list > .edu {
+  position: relative;
+  padding: 0 0 26px 26px;
+}
+.edu-list > .edu:last-child {
+  padding-bottom: 0;
+}
+.edu-list > .edu::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 22px; /* from the bottom of this dot… */
+  bottom: -13px; /* …to the top of the next one */
+  width: 1px;
+  background: var(--line);
+}
+.edu-list > .edu:last-child::before {
+  display: none;
+}
+.edu-list > .edu::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+  background: var(--bg);
+}
+.edu header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+.edu h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+.edu header p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+/* Company and school names link out; an arrow appears on hover, like the other external links. */
+.org-link {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.org-link::after {
+  content: " ↗";
+  font-size: 0.85em;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.org-link:hover {
+  color: var(--text);
+  text-decoration-color: var(--line-strong);
+}
+.org-link:hover::after,
+.org-link:focus-visible::after {
+  opacity: 1;
+}
+.edu time {
+  align-self: start;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+/* Logos are drawn as masks so they take the text colour — no brand colours. */
+.logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  position: relative;
+}
+.logo::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  background: var(--icon);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+.card .label {
+  margin: 16px 0 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.card .label::before {
+  content: "// ";
+  opacity: 0.6;
+}
+.edu .projects {
+  margin: 0;
+}
+.projects small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.projects em {
+  white-space: nowrap;
+}
+
+/* Academic entries: title and meta on one line, then text actions for the
+   paper and the demo (which opens in the player). */
+.entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.entries > li {
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.entries > li:last-child {
+  border-bottom: 0;
+}
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 15px;
+}
+.entries small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.entries em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 6px;
+}
+.about-actions {
+  margin-top: 14px;
+}
+.actions a,
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.actions a:hover,
+.actions button:hover {
+  color: var(--text);
+  text-decoration-color: var(--line-strong);
+}
+
+.card section[data-panel="projects"] > .label:first-child {
+  margin-top: 0;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.tags li {
+  padding: 1px 7px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ---------- Work ---------- */
+
+.roles {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+/* A thin timeline: a dot per role on a hairline rail. */
+.role {
+  position: relative;
+  padding: 0 0 18px 26px;
+}
+.role::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 14px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--line);
+}
+.role:last-child {
+  padding-bottom: 0;
+}
+.role:last-child::before {
+  display: none;
+}
+.role::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+  background: var(--bg);
+}
+.role.current::after {
+  background: var(--text);
+  border-color: var(--text);
+}
+.role-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.role h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+.role time {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.points {
+  margin: 8px 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.points li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--body-text);
+}
+.points li + li {
+  margin-top: 3px;
+}
+.points li::before {
+  content: "–";
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+}
+.role .tags {
+  margin: 0;
+}
+
+/* ---------- Scrollbars ---------- */
+
+/* A slim pill floating inside the card, in the same grays as the rest of the UI.
+   Chromium and Safari use the ::-webkit-scrollbar parts; Firefox gets the
+   standard properties (setting both would make Chromium ignore the pill). */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 99px;
+  background: var(--scroll-thumb) padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-thumb-hover);
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) transparent;
+  }
+}
+
+/* ---------- Player ---------- */
+
+/* Classes that set `display` override the [hidden] attribute, so restore it. */
+[hidden] {
+  display: none !important;
+}
+
+.player {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.player-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--haze), 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.player-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
+}
+/* Solid, not glass: a backdrop filter on the frame softened the video. */
+.player-frame {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 40px var(--shadow);
+}
+
+.player-frame header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 0 6px;
+  font-size: 13px;
+  color: var(--body-text);
+}
+.player-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--button);
+}
+.player-close:hover {
+  background: var(--button-hover);
+}
+/* Shorts are vertical. */
+.player-video {
+  height: min(78vh, 720px);
+  aspect-ratio: 9 / 16;
+  max-width: calc(100vw - 52px);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.player-video iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* iPhone frame for the mobile app demos: black bezel, Dynamic Island and side
+   buttons, with the title and close button floating above the device. */
+.player[data-device="phone"] .player-frame {
+  --bezel: #0c0c0e;
+  --button-metal: #2a2b30;
+  padding: 11px;
+  border: 0;
+  border-radius: 58px;
+  background: var(--bezel);
+  box-shadow:
+    inset 0 0 0 1.5px var(--button-metal),
+    inset 0 0 0 4px var(--bezel),
+    inset 0 0 0 5px rgba(255, 255, 255, 0.06),
+    0 30px 80px var(--shadow),
+    0 8px 24px var(--shadow);
+}
+.player[data-device="phone"] .player-frame header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 12px);
+  padding: 0 4px 0 8px;
+  color: var(--text);
+}
+.player[data-device="phone"] .player-video {
+  position: relative;
+  height: min(80vh, 760px);
+  aspect-ratio: 9 / 19.5;
+  max-width: calc(100vw - 54px);
+  border-radius: 47px;
+}
+/* Dynamic Island, drawn over the video. */
+.player[data-device="phone"] .player-video::before {
+  content: "";
+  position: absolute;
+  top: 2.2%;
+  left: 50%;
+  translate: -50% 0;
+  width: 31%;
+  height: 3.6%;
+  border-radius: 999px;
+  background: #000;
+  z-index: 1;
+  pointer-events: none;
+}
+/* Power button on the right; action and volume buttons on the left. */
+.player[data-device="phone"] .player-frame::before,
+.player[data-device="phone"] .player-frame::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  background: var(--button-metal);
+}
+.player[data-device="phone"] .player-frame::before {
+  right: -3px;
+  top: 27%;
+  height: 12%;
+  border-radius: 0 2px 2px 0;
+}
+.player[data-device="phone"] .player-frame::after {
+  left: -3px;
+  top: 17%;
+  height: 4%;
+  border-radius: 2px 0 0 2px;
+  box-shadow:
+    0 calc(min(80vh, 760px) * 0.075) 0 var(--button-metal),
+    0 calc(min(80vh, 760px) * 0.155) 0 var(--button-metal);
+}
+
+
+/* MacBook frame for the desktop demos (landscape videos): a black-bezelled
+   lid with a notch, sitting on a thin aluminium base. */
+.player[data-device="laptop"] .player-frame {
+  --bezel: #0c0c0e;
+  --alu: #d3d5da;
+  --alu-dark: #a7aab1;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+:root[data-theme="dark"] .player[data-device="laptop"] .player-frame {
+  --alu: #4a4c52;
+  --alu-dark: #2b2c31;
+}
+.player[data-device="laptop"] .player-frame header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 12px);
+  padding: 0 4px 0 8px;
+  color: var(--text);
+}
+/* The lid: padding is the bezel, so it scales with the screen. */
+.player[data-device="laptop"] .player-video {
+  position: relative;
+  width: min(calc(100vw - 72px), 960px, calc(68vh * 1.6));
+  height: auto;
+  max-width: none;
+  aspect-ratio: 16 / 10.4;
+  padding: 1.7%;
+  border-radius: 18px 18px 4px 4px;
+  background: var(--bezel);
+  box-shadow:
+    0 0 0 1.5px var(--alu-dark),
+    0 30px 70px var(--shadow);
+}
+/* Camera notch at the top of the screen. */
+.player[data-device="laptop"] .player-video::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 10%;
+  height: 3.2%;
+  border-radius: 0 0 8px 8px;
+  background: var(--bezel);
+  z-index: 1;
+  pointer-events: none;
+}
+/* The base, a little wider than the lid, with the thumb scoop in the middle. */
+.player[data-device="laptop"] .player-frame::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -7%;
+  right: -7%;
+  height: clamp(10px, 1.6vw, 16px);
+  border-radius: 2px 2px 14px 14px / 2px 2px 10px 10px;
+  background: linear-gradient(var(--alu), var(--alu-dark));
+  box-shadow: 0 14px 30px var(--shadow);
+}
+.player[data-device="laptop"] .player-frame::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  translate: -50% 0;
+  width: 14%;
+  height: clamp(4px, 0.6vw, 6px);
+  border-radius: 0 0 8px 8px;
+  background: var(--alu-dark);
+  z-index: 1;
+}
+
+/* ---------- Demo previews (ui/preview.ts) ---------- */
+
+/* A small, silent device floating beside "watch the demo" — the same iPhone
+   and MacBook as the player, scaled down. Never interactive. */
+.preview {
+  position: fixed;
+  z-index: 15;
+  pointer-events: none;
+  --bezel: #0c0c0e;
+  --button-metal: #2a2b30;
+  --alu: #d3d5da;
+  --alu-dark: #a7aab1;
+}
+:root[data-theme="dark"] .preview {
+  --alu: #4a4c52;
+  --alu-dark: #2b2c31;
+}
+.preview-device {
+  position: relative;
+  background: var(--bezel);
+  box-shadow: 0 18px 44px var(--shadow), 0 4px 12px var(--shadow);
+}
+.preview-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+.preview-screen iframe,
+.preview-screen video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.preview[data-device="phone"] .preview-device {
+  width: 132px;
+  aspect-ratio: 9 / 19.5;
+  padding: 4px;
+  border-radius: 24px;
+  box-shadow:
+    inset 0 0 0 1px var(--button-metal),
+    0 18px 44px var(--shadow),
+    0 4px 12px var(--shadow);
+}
+.preview[data-device="phone"] .preview-screen {
+  border-radius: 20px;
+}
+/* Dynamic Island. */
+.preview[data-device="phone"] .preview-screen::before {
+  content: "";
+  position: absolute;
+  top: 2.4%;
+  left: 50%;
+  translate: -50% 0;
+  width: 32%;
+  height: 3.4%;
+  border-radius: 999px;
+  background: #000;
+  z-index: 1;
+}
+
+/* MacBook: the lid's padding is the bezel; the base hangs below it. */
+.preview[data-device="laptop"] .preview-device {
+  width: 300px;
+  aspect-ratio: 16 / 10.4;
+  padding: 1.8%;
+  border-radius: 9px 9px 2px 2px;
+  box-shadow:
+    0 0 0 1px var(--alu-dark),
+    0 18px 44px var(--shadow);
+}
+.preview[data-device="laptop"] .preview-device::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -7%;
+  right: -7%;
+  height: 7px;
+  border-radius: 1px 1px 8px 8px / 1px 1px 6px 6px;
+  background: linear-gradient(var(--alu), var(--alu-dark));
+}
+.preview[data-device="laptop"] .preview-screen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 10%;
+  height: 3.2%;
+  border-radius: 0 0 4px 4px;
+  background: var(--bezel);
+  z-index: 1;
+}
+
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 640px) {
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The whole page scrolls (under the tab bar), instead of scrolling inside the card. */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* centring would push tall content off the top */
+    align-items: stretch;
+    gap: 16px;
+    padding: calc(env(safe-area-inset-top) + 96px) 16px calc(env(safe-area-inset-bottom) + 112px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    scrollbar-width: none;
+  }
+  .hero::-webkit-scrollbar {
+    display: none;
+  }
+  h1 {
+    padding: 0 4px;
+    font-size: 40px;
+    text-align: left;
+  }
+
+  /* overflow:hidden would otherwise let the card shrink to fit the screen. */
+  .hero > * {
+    flex-shrink: 0;
+  }
+  .card,
+  .card[data-active] {
+    width: 100%;
+    padding: 16px;
+    border-radius: 22px;
+  }
+  .card section[data-panel="academic"],
+  .card section[data-panel="projects"] {
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  /* iOS-style tab bar: icons over labels, floating above the home indicator. */
+  .nav {
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    left: 12px;
+    right: 12px;
+    translate: none;
+    padding: 6px;
+    border-radius: 28px;
+  }
+  .nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 7px 0 6px;
+    border-radius: 22px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .tab-icon {
+    display: block;
+  }
+  /* Content scrolls underneath, so the tab bar gets an opaque surface. */
+  .nav {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 14px var(--shadow);
+  }
+
+  /* 30px = 6 cells of 5px, so the sun/moon lines up with the grid. */
+  .theme-badge {
+    top: calc(env(safe-area-inset-top) + 14px);
+    right: 14px;
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Headers stack: logo on the left, title over dates. */
+  .edu header {
+    grid-template-columns: auto 1fr;
+    row-gap: 2px;
+  }
+  .edu header .logo {
+    grid-row: span 2;
+    align-self: start;
+  }
+  .edu header time {
+    grid-column: 2;
+    align-self: auto;
+  }
+
+  /* List rows: meta drops under the title. */
+  .projects a {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .projects em {
+    white-space: normal;
+  }
+
+  .entry-head {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .entries em {
+    white-space: normal;
+  }
+
+  .socials a {
+    grid-template-columns: 22px 1fr auto;
+  }
+  .social-label {
+    display: none;
+  }
+
+  .player-video {
+    height: min(74vh, 640px);
+  }
+  /* Leave room above the phone for its title row. */
+  .player[data-device="phone"] .player-video {
+    height: min(72vh, 640px);
+  }
+}
+
+/* ---------- Surfaces ---------- */
+
+:root {
+  --surface: #fbfbfa;
+  --line-strong: rgba(20, 20, 30, 0.16);
+}
+:root[data-theme="dark"] {
+  --surface: #121317;
+  --line-strong: rgba(255, 255, 255, 0.16);
+}
