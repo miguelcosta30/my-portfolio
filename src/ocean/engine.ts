@@ -1,5 +1,5 @@
 import { ThemeBadge } from "./badge";
-import { SPAWN_ORDER, Shark } from "./shark";
+import { SHARK_KINDS, Shark } from "./shark";
 
 /** Grid cell size in px — smaller on phones so the sharks keep their detail. */
 export let CELL = 10;
@@ -19,8 +19,7 @@ const LEVELS = 16;
 const FULL = 9; // samples per cell at full coverage (splat spacing is 0.3 cell)
 const ACCENT_CHANCE = 6; // % of tiles that get a stronger accent on top of the shark's cast
 const RESIDENT_SHARKS = 2;
-const INTRO_HOLD = 6; // seconds before the opening group starts fading
-const INTRO_FADE = 2;
+const INTRO_HOLD = 6; // seconds before the extra opening sharks swim away
 
 type RGB = [number, number, number];
 
@@ -179,7 +178,7 @@ export class OceanEngine {
   private overlay?: CanvasRenderingContext2D;
 
   private tintById: number[] = [];
-  private opacityById: number[] = [];
+  private nextDeparture = 18 + Math.random() * 12;
   private raf = 0;
   private last = 0;
   private time = 0;
@@ -360,16 +359,20 @@ export class OceanEngine {
     this.owner = new Int32Array(n);
     this.key = new Uint32Array(n);
 
-    const opening = !this.still && this.time < INTRO_HOLD + INTRO_FADE;
+    const opening = !this.still && this.time < INTRO_HOLD;
     const want = opening ? Math.round(Math.min(7, Math.max(3, (this.w * this.h) / 360_000))) : RESIDENT_SHARKS;
     for (const s of this.sharks) {
       s.w = this.w;
       s.h = this.h;
     }
-    while (this.sharks.length < want) {
-      const s = new Shark(this.w, this.h, SPAWN_ORDER[this.sharks.length % SPAWN_ORDER.length]);
-      s.intro = this.sharks.length >= RESIDENT_SHARKS;
-      this.sharks.push(s);
+    // Populate only once: resizing must never add sharks in plain sight.
+    if (!this.sharks.length) {
+      for (let i = 0; i < want; i++) {
+        const kind = SHARK_KINDS[Math.floor(Math.random() * SHARK_KINDS.length)];
+        const s = new Shark(this.w, this.h, kind);
+        s.intro = i >= RESIDENT_SHARKS;
+        this.sharks.push(s);
+      }
     }
 
     this.dust = Array.from({ length: Math.round((this.w * this.h) / 9000) }, () => ({
@@ -406,13 +409,29 @@ export class OceanEngine {
 
   private update(dt: number) {
     this.badge?.update(dt, this.pointer, CELL);
-    const introOpacity = Math.max(0, 1 - Math.max(0, this.time - INTRO_HOLD) / INTRO_FADE);
-    this.sharks = this.sharks.filter((s) => !s.intro || introOpacity > 0);
+    if (this.time >= INTRO_HOLD) {
+      for (const s of this.sharks) if (s.intro) s.leave();
+    }
+    // One visitor leaves at a time, with irregular intervals between visits.
+    if (this.time >= this.nextDeparture && !this.sharks.some((s) => s.intro || s.leaving)) {
+      const residents = this.sharks.filter((s) => !s.intro);
+      residents[Math.floor(Math.random() * residents.length)]?.leave();
+    }
     for (const s of this.sharks) {
-      s.opacity = s.intro ? introOpacity : 1;
       s.update(dt, this.pointer);
       if (Math.random() < dt * 0.6) this.burst(s.head(), 2 + Math.floor(Math.random() * 3));
     }
+    const replacements: Shark[] = [];
+    this.sharks = this.sharks.filter((s) => {
+      if (!s.leaving || !s.offscreen) return true;
+      if (!s.intro) {
+        const kinds = SHARK_KINDS.filter((kind) => kind !== s.kind);
+        replacements.push(new Shark(this.w, this.h, kinds[Math.floor(Math.random() * kinds.length)], true));
+        this.nextDeparture = this.time + 18 + Math.random() * 24;
+      }
+      return false;
+    });
+    this.sharks.push(...replacements);
     this.sharks.sort((a, b) => a.depth - b.depth);
 
     for (const p of this.dust) {
@@ -441,7 +460,6 @@ export class OceanEngine {
     for (const s of this.sharks) {
       const id = s.id;
       this.tintById[id] = s.tint;
-      this.opacityById[id] = s.opacity;
       s.splat(CELL, (x, y, b, k) => {
         const c = Math.floor(x / CELL);
         const r = Math.floor(y / CELL);
@@ -487,7 +505,7 @@ export class OceanEngine {
     for (let i = 0; i < owner.length; i++) {
       if (owner[i] < 0) continue;
       const b = (bright[i] /= count[i]);
-      alpha[i] = Math.min(1, count[i] / FULL) ** 0.8 * this.opacityById[owner[i]];
+      alpha[i] = Math.min(1, count[i] / FULL) ** 0.8;
       if (alpha[i] < 0.08) continue;
       ctx.globalAlpha = alpha[i];
       const hk = hash(key[i]);

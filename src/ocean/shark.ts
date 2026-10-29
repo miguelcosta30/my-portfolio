@@ -15,8 +15,7 @@ const angleTo = (from: number, to: number) => {
 
 export type SharkKind = "shark" | "hammerhead" | "reef" | "thresher";
 
-/** Spawn mix: mostly classic sharks, with the other species sprinkled in. */
-export const SPAWN_ORDER: SharkKind[] = ["shark", "reef", "hammerhead", "thresher", "shark", "reef", "hammerhead"];
+export const SHARK_KINDS: SharkKind[] = ["shark", "reef", "hammerhead", "thresher"];
 
 /** Per-species proportions, all in body lengths. */
 const BODY: Record<SharkKind, { width: number; trunk: number; fin: number; size: number }> = {
@@ -164,9 +163,10 @@ export class Shark {
   L = 260;
   speed = 50;
   depth = 1;
-  /** Extra sharks fade out after the opening scene. */
+  /** Extra sharks swim away after the opening scene. */
   intro = false;
-  opacity = 1;
+  leaving = false;
+  private exitAngle = 0;
   private phase = Math.random() * Math.PI * 2;
   private omega = 0;
   private turnTarget = 0;
@@ -176,13 +176,24 @@ export class Shark {
   private fleeAngle = 0;
   private trail: Pt[] = [];
 
-  constructor(public w: number, public h: number, readonly kind: SharkKind = "shark") {
+  constructor(public w: number, public h: number, readonly kind: SharkKind = "shark", entering = false) {
     this.depth = 0.35 + Math.random() * 0.65;
     this.L = (260 + 240 * this.depth) * clamp(Math.min(w, h) / 900, 0.5, 1.2) * sizeFactor(kind);
     this.speed = (30 + 45 * this.depth) * (0.85 + Math.random() * 0.3);
     this.x = Math.random() * w;
     this.y = Math.random() * h;
     this.heading = Math.random() * Math.PI * 2;
+    if (entering) {
+      // The entire body starts outside the viewport, pointing inward. Its
+      // history is built here too, so neither the head nor tail pops into view.
+      const margin = this.L * 0.55;
+      const side = Math.floor(Math.random() * 4);
+      if (side === 0) { this.x = -margin; this.heading = 0; }
+      if (side === 1) { this.x = w + margin; this.heading = Math.PI; }
+      if (side === 2) { this.y = -margin; this.heading = Math.PI / 2; }
+      if (side === 3) { this.y = h + margin; this.heading = -Math.PI / 2; }
+      this.heading += (Math.random() - 0.5) * 0.45;
+    }
     for (let d = Math.ceil(this.L * 1.1); d >= 0; d -= 4) {
       this.trail.push({
         x: this.x - Math.cos(this.heading) * d,
@@ -195,11 +206,35 @@ export class Shark {
     return 0.55 + 0.45 * this.depth;
   }
 
+  /** Commit to an outward route until the whole body has left the screen. */
+  leave() {
+    if (this.leaving) return;
+    this.leaving = true;
+    const exits = [
+      { distance: this.x, angle: Math.PI },
+      { distance: this.w - this.x, angle: 0 },
+      { distance: this.y, angle: -Math.PI / 2 },
+      { distance: this.h - this.y, angle: Math.PI / 2 },
+    ];
+    exits.sort((a, b) => a.distance - b.distance);
+    this.exitAngle = exits[Math.random() < 0.8 ? 0 : 1].angle + (Math.random() - 0.5) * 0.4;
+    this.flee = 0;
+  }
+
+  /** Include the tail history, lateral swim and upright fins before retiring. */
+  get offscreen() {
+    const pad = this.L * 0.4;
+    const points = [{ x: this.x, y: this.y }, ...this.trail];
+    return points.every((p) => p.x < -pad) || points.every((p) => p.x > this.w + pad)
+      || points.every((p) => p.y < -pad) || points.every((p) => p.y > this.h + pad);
+  }
+
   /**
    * React to a click at (x, y). Sharks within reach dart away, harder the
    * closer they are. Returns how startled the shark is (0 = unaffected).
    */
   scare(x: number, y: number): number {
+    if (this.leaving) return 0;
     // Measure from the middle of the body, not just the nose.
     const mid = this.trail[Math.max(0, this.trail.length - 1 - Math.round(this.L / 8))];
     const cx = (this.x + mid.x) / 2;
@@ -260,6 +295,11 @@ export class Shark {
       this.turnTarget = 0;
       maxTurn = 4.5;
       response = 6;
+    }
+    if (this.leaving) {
+      steer = angleTo(this.heading, this.exitAngle) * 6;
+      this.turnTarget = 0;
+      response = 3;
     }
 
     this.boost *= Math.exp(-dt * (this.flee > 0 ? 0.4 : 1.3));
