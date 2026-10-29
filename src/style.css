@@ -312,7 +312,7 @@ h1 .smile {
   /* Fade the bottom edge so it's obvious there's more to scroll. */
   -webkit-mask-image: linear-gradient(#000 calc(100% - 36px), transparent);
   mask-image: linear-gradient(#000 calc(100% - 36px), transparent);
-  padding-bottom: 28px;
+  padding-bottom: 52px;
 }
 .edu-list {
   margin: 0;
@@ -395,7 +395,7 @@ h1 .smile {
   color: var(--muted);
   white-space: nowrap;
 }
-/* Logos are drawn as masks so they take the text colour — no brand colours. */
+/* The vector mark uses a mask; raster logos use images to stay stable while scrolling. */
 .logo {
   width: 36px;
   height: 36px;
@@ -411,6 +411,24 @@ h1 .smile {
   background: var(--icon);
   -webkit-mask: var(--logo) center / contain no-repeat;
   mask: var(--logo) center / contain no-repeat;
+}
+.logo-image {
+  display: grid;
+  place-items: center;
+}
+.logo-image::before {
+  content: none;
+}
+.logo-image img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  /* Keep the monochrome appearance without a scrolling CSS image mask. */
+  filter: brightness(0) invert(0.44);
+}
+[data-theme="dark"] .logo-image img {
+  filter: brightness(0) invert(0.62);
 }
 .card .label {
   margin: 16px 0 2px;
@@ -960,7 +978,7 @@ h1 .smile {
     justify-content: flex-start; /* centring would push tall content off the top */
     align-items: stretch;
     gap: 16px;
-    padding: calc(env(safe-area-inset-top) + 96px) 16px calc(env(safe-area-inset-bottom) + 112px);
+    padding: calc(env(safe-area-inset-top) + 96px) 16px 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     pointer-events: auto;
@@ -968,6 +986,12 @@ h1 .smile {
   }
   .hero::-webkit-scrollbar {
     display: none;
+  }
+  /* A real flex item keeps the end reachable above the floating tab bar,
+     including in mobile browsers that clip a scroller's trailing padding. */
+  .hero::after {
+    content: "";
+    flex: 0 0 calc(env(safe-area-inset-bottom) + 112px);
   }
   h1 {
     padding: 0 4px;
